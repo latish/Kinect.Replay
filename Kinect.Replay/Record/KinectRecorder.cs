@@ -35,7 +35,7 @@ namespace Kinect.Replay.Record
 			writer.Write(colorToDepthRelationalParameters.Length);
 			writer.Write(colorToDepthRelationalParameters);
 
-			if ((Options & KinectRecordOptions.Frames)!=0)
+			if ((Options & KinectRecordOptions.Frames) != 0)
 			{
 				colorRecoder = new ColorRecorder(writer);
 				depthRecorder = new DepthRecorder(writer);
@@ -50,8 +50,8 @@ namespace Kinect.Replay.Record
 
 		public void Record(SkeletonFrame frame)
 		{
-            if(skeletonRecorder==null)
-                return;
+			if (skeletonRecorder == null)
+				return;
 			if (writer == null)
 				throw new Exception("This recorder is stopped");
 
@@ -61,8 +61,8 @@ namespace Kinect.Replay.Record
 
 		public void Record(ColorImageFrame frame)
 		{
-            if(colorRecoder==null)
-                return;
+			if (colorRecoder == null)
+				return;
 			if (writer == null)
 				throw new Exception("This recorder is stopped");
 
@@ -72,8 +72,8 @@ namespace Kinect.Replay.Record
 
 		public void Record(DepthImageFrame frame)
 		{
-            if(depthRecorder==null)
-                return;
+			if (depthRecorder == null)
+				return;
 			if (writer == null)
 				throw new Exception("This recorder is stopped");
 
@@ -82,11 +82,11 @@ namespace Kinect.Replay.Record
 		}
 
 		public void StartAudioRecording()
-        {
-            if(audioRecorder==null ||audioRecorder.IsRunning)
-                return;
-	        audioRecorder.Record(_sensor);
-        }
+		{
+			if (audioRecorder == null || audioRecorder.IsRunning)
+				return;
+			audioRecorder.RecordDefaultDeviceAudio();
+		}
 
 		private void Flush()
 		{
@@ -104,8 +104,8 @@ namespace Kinect.Replay.Record
 			if (writer == null)
 				throw new Exception("This recorder is already stopped");
 
-            if(audioRecorder!=null && audioRecorder.IsRunning)
-                audioRecorder.Stop(Path.ChangeExtension(recordFileName,".wav"));
+			if (audioRecorder != null && audioRecorder.IsRunning)
+				audioRecorder.StopDefaultAudioRecording(Path.ChangeExtension(recordFileName, ".wav"));
 
 			writer.Close();
 			writer.Dispose();
@@ -113,5 +113,6 @@ namespace Kinect.Replay.Record
 			recordStream.Dispose();
 			recordStream = null;
 		}
+
 	}
 }

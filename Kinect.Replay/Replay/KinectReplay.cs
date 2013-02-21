@@ -43,7 +43,7 @@ namespace Kinect.Replay.Replay
 			{
 				framesReplay = new ReplayAllFramesSystem();
 				framesReplay.AddFrames(reader);
-				framesReplay.ReplayFinished += () => Dispatcher.CurrentDispatcher.Invoke(new Action(() => ReplayFinished.Raise()));
+				framesReplay.ReplayFinished += () => synchronizationContext.Send(state => ReplayFinished.Raise(),null);
 			}
 			if ((Options & KinectRecordOptions.Audio) != 0)
 			{

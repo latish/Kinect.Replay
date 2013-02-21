@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Media;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -259,7 +260,7 @@ namespace Kinect.Recorder
 			var saveFileDialog = new SaveFileDialog { Title = "Select filename", Filter = "Replay files|*.replay" };
 			if (saveFileDialog.ShowDialog() != true) return;
 
-			recorder = new KinectRecorder(KinectRecordOptions.Frames, saveFileDialog.FileName, _kinectSensor);
+			recorder = new KinectRecorder(KinectRecordOptions.Frames | KinectRecordOptions.Audio, saveFileDialog.FileName, _kinectSensor);
 			recorder.StartAudioRecording();
 			IsRecording = true;
 		}
@@ -280,7 +281,10 @@ namespace Kinect.Recorder
 				replay.ReplayFinished += CleanupReplay;
 				replay.Start();
 				if ((replay.Options & KinectRecordOptions.Audio) != 0)
-					AudioPlayer.Source = new Uri(replay.AudioFilePath, UriKind.RelativeOrAbsolute);
+				{
+					var soundPlayer = new SoundPlayer(replay.AudioFilePath);
+					soundPlayer.Play();
+				}
 			}
 			IsReplaying = true;
 		}
@@ -292,7 +296,6 @@ namespace Kinect.Recorder
 			replay.Stop();
 			replay.Dispose();
 			replay = null;
-			AudioPlayer.Stop();
 			IsReplaying = false;
 		}
 

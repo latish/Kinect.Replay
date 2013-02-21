@@ -41,6 +41,5 @@
         <Canvas Height="480" Width="640" x:Name="SkeletonCanvas" >
             <Image Height="480" Width="640" Source="{Binding ImageSource}"/>
         </Canvas>
-        <MediaElement LoadedBehavior="Play" UnloadedBehavior="Manual" x:Name="AudioPlayer"/>
     </StackPanel>
 </Window>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Microsoft.Kinect;
@@ -14,13 +15,12 @@ namespace Kinect.Replay.Record
 		private Thread workingThread;
 		private MemoryStream contentMemoryStream;
 
-		public void Record(KinectSensor sensor)
+		public void Record()
 		{
 			if (IsRunning)
 				throw new Exception("AudioRecorder is already Recording");
 
 			IsRunning = true;
-			kinectSensor = sensor;
 			recordingStartTime = DateTime.Now;
 			workingThread = new Thread(RecordAudio) { IsBackground = true };
 			workingThread.Start();
@@ -45,6 +45,20 @@ namespace Kinect.Replay.Record
 				}
 			}
 		}
+
+		public void RecordDefaultDeviceAudio()
+        {
+			  IsRunning = true;
+			  mciSendString("open new Type waveaudio Alias recsound", "", 0, 0);
+			  mciSendString("record recsound", "", 0, 0);
+        }
+
+		public void StopDefaultAudioRecording(string audioFilePath)
+        {
+			  mciSendString(string.Format("save recsound {0}",audioFilePath), "", 0, 0);
+			  mciSendString("close recsound ", "", 0, 0); 
+			  IsRunning = false;
+        }
 
 		private void SaveAudioToFile(string audioFilePath)
 		{
@@ -132,6 +146,9 @@ namespace Kinect.Replay.Record
 			public ushort wBitsPerSample;
 			public ushort cbSize;
 		}
+
+		[DllImport("winmm.dll", EntryPoint = "mciSendStringA", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
+		private static extern int mciSendString(string lpstrCommand, string lpstrReturnString, int uReturnLength, int hwndCallback);
 
 	}
 }
