@@ -11,7 +11,7 @@ using Kinect.Replay.Replay.Skeletons;
 
 namespace Kinect.Replay.Replay
 {
-	internal class ReplayAllFramesSystem 
+	internal class ReplayAllFramesSystem
 	{
 		protected readonly List<ReplayAllFrames> frames = new List<ReplayAllFrames>();
 		private CancellationTokenSource cancellationTokenSource;
@@ -27,18 +27,18 @@ namespace Kinect.Replay.Replay
 			cancellationTokenSource = new CancellationTokenSource();
 			var token = cancellationTokenSource.Token;
 			Task.Factory.StartNew(() =>
-				                      {
-					                      foreach (var frame in frames)
-					                      {
-						                      Thread.Sleep(TimeSpan.FromMilliseconds(frame.TimeStamp));
-						                      if (token.IsCancellationRequested)
-							                      break;
-						                      if (FrameReady != null)
-							                      FrameReady(frame);
-					                      }
-					                      IsFinished = true;
-					                      ReplayFinished.Raise();
-				                      }, token);
+											 {
+												 foreach (var frame in frames)
+												 {
+													 Thread.Sleep(TimeSpan.FromMilliseconds(frame.TimeStamp));
+													 if (token.IsCancellationRequested)
+														 break;
+													 if (FrameReady != null)
+														 FrameReady(frame);
+												 }
+												 IsFinished = true;
+												 ReplayFinished.Raise();
+											 }, token);
 		}
 
 		public void Stop()
@@ -50,32 +50,29 @@ namespace Kinect.Replay.Replay
 
 		internal void AddFrames(BinaryReader reader)
 		{
-            //not the best of approaches - assuming that color frame is the 1st frame followed by depth and skeleton frame
-			while (reader.BaseStream.Position != reader.BaseStream.Length)
+			//not the best of approaches - assuming that color frame is the 1st frame followed by depth and skeleton frame
+			while (reader.BaseStream.Position < reader.BaseStream.Length)
 			{
-				var header = (FrameType) reader.ReadInt32();
+				var header = (FrameType)reader.ReadInt32();
 				switch (header)
 				{
 					case FrameType.Color:
 						var colorFrame = new ReplayColorImageFrame();
 						colorFrame.CreateFromReader(reader);
-						frames.Add(new ReplayAllFrames {ColorImageFrame = colorFrame});
+						frames.Add(new ReplayAllFrames { ColorImageFrame = colorFrame });
 						break;
 					case FrameType.Depth:
+
+						var depthFrame = new ReplayDepthImageFrame();
+						depthFrame.CreateFromReader(reader);
 						if (frames.Any())
-						{
-							var depthFrame = new ReplayDepthImageFrame();
-							depthFrame.CreateFromReader(reader);
 							frames.Last().DepthImageFrame = depthFrame;
-						}
 						break;
 					case FrameType.Skeletons:
+						var skeletonFrame = new ReplaySkeletonFrame();
+						skeletonFrame.CreateFromReader(reader);
 						if (frames.Any())
-						{
-							var skeletonFrame = new ReplaySkeletonFrame();
-							skeletonFrame.CreateFromReader(reader);
 							frames.Last().SkeletonFrame = skeletonFrame;
-						}
 						break;
 				}
 			}

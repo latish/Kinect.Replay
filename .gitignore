@@ -10,4 +10,4 @@ build/
 _ReSharper.*/
 AssemblyInfo.cs
 *.user
-
+*.ncrunch*

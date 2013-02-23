@@ -19,6 +19,7 @@ namespace Kinect.Recorder
 {
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
+		private const KinectRecordOptions RecordOptions = KinectRecordOptions.Frames | KinectRecordOptions.Audio;
 		private KinectSensor _kinectSensor;
 		private string _message;
 		private WriteableBitmap _imageSource;
@@ -28,6 +29,8 @@ namespace Kinect.Recorder
 		private KinectReplay replay;
 		private bool _isRecording;
 		private bool _isReplaying;
+		private bool _startedAudio;
+		private SoundPlayer _soundPlayer;
 
 		public MainWindow()
 		{
@@ -255,12 +258,14 @@ namespace Kinect.Recorder
 				recorder.Stop();
 				recorder = null;
 				IsRecording = false;
+				Message = "";
 				return;
 			}
 			var saveFileDialog = new SaveFileDialog { Title = "Select filename", Filter = "Replay files|*.replay" };
 			if (saveFileDialog.ShowDialog() != true) return;
 
-			recorder = new KinectRecorder(KinectRecordOptions.Frames | KinectRecordOptions.Audio, saveFileDialog.FileName, _kinectSensor);
+			recorder = new KinectRecorder(RecordOptions, saveFileDialog.FileName, _kinectSensor);
+			Message = string.Format("Recording {0}", RecordOptions.ToString());
 			recorder.StartAudioRecording();
 			IsRecording = true;
 		}
@@ -270,21 +275,19 @@ namespace Kinect.Recorder
 			if (IsReplaying)
 			{
 				CleanupReplay();
+				Message = "";
 				return;
 			}
+			_startedAudio = false;
 			var openFileDialog = new OpenFileDialog { Title = "Select filename", Filter = "Replay files|*.replay" };
 
 			if (openFileDialog.ShowDialog() == true)
 			{
 				replay = new KinectReplay(openFileDialog.FileName);
+                Message = string.Format("Replaying {0}", RecordOptions.ToString());
 				replay.AllFramesReady += ReplayAllFramesReady;
 				replay.ReplayFinished += CleanupReplay;
 				replay.Start();
-				if ((replay.Options & KinectRecordOptions.Audio) != 0)
-				{
-					var soundPlayer = new SoundPlayer(replay.AudioFilePath);
-					soundPlayer.Play();
-				}
 			}
 			IsReplaying = true;
 		}
@@ -292,6 +295,9 @@ namespace Kinect.Recorder
 		private void CleanupReplay()
 		{
 			if (!IsReplaying) return;
+			Message = "";
+            if(_soundPlayer!=null && _startedAudio)
+                _soundPlayer.Stop();
 			replay.AllFramesReady -= ReplayAllFramesReady;
 			replay.Stop();
 			replay.Dispose();
@@ -301,6 +307,13 @@ namespace Kinect.Recorder
 
 		void ReplayAllFramesReady(ReplayAllFramesReadyEventArgs e)
 		{
+			if ((replay.Options & KinectRecordOptions.Audio) != 0 && !_startedAudio)
+			{
+				_soundPlayer = new SoundPlayer(replay.AudioFilePath);
+				_soundPlayer.Play();
+				_startedAudio = true;
+			}
+
 			var colorImageFrame = e.AllFrames.ColorImageFrame;
 			if (colorImageFrame != null)
 				UpdateColorFrame(colorImageFrame);

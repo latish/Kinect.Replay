@@ -7,6 +7,13 @@ using Microsoft.Kinect;
 
 namespace Kinect.Replay.Record
 {
+	/// <summary>
+	/// 
+	/// </summary>
+    ///<remarks>
+    /// This whole thing is a hack right now. Couldn't record from Kinect Audio Stream on my VMWare Fusion VM, 
+    /// so recording from default audio source via native API calls right now
+    /// </remarks>
 	public class AudioRecorder
 	{
 		public bool IsRunning { get; private set; }
@@ -15,6 +22,24 @@ namespace Kinect.Replay.Record
 		private Thread workingThread;
 		private MemoryStream contentMemoryStream;
 
+		public void RecordDefaultDeviceAudio()
+		{
+			IsRunning = true;
+			mciSendString("open new Type waveaudio Alias recsound", "", 0, 0);
+			mciSendString("record recsound", "", 0, 0);
+		}
+
+		public void StopDefaultAudioRecording(string audioFilePath)
+		{
+			mciSendString(string.Format("save recsound {0}", audioFilePath), "", 0, 0);
+			mciSendString("close recsound ", "", 0, 0);
+			IsRunning = false;
+		}
+
+		[DllImport("winmm.dll", EntryPoint = "mciSendStringA", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
+		private static extern int mciSendString(string lpstrCommand, string lpstrReturnString, int uReturnLength, int hwndCallback);
+
+		#region Todo
 		public void Record()
 		{
 			if (IsRunning)
@@ -46,20 +71,6 @@ namespace Kinect.Replay.Record
 			}
 		}
 
-		public void RecordDefaultDeviceAudio()
-        {
-			  IsRunning = true;
-			  mciSendString("open new Type waveaudio Alias recsound", "", 0, 0);
-			  mciSendString("record recsound", "", 0, 0);
-        }
-
-		public void StopDefaultAudioRecording(string audioFilePath)
-        {
-			  mciSendString(string.Format("save recsound {0}",audioFilePath), "", 0, 0);
-			  mciSendString("close recsound ", "", 0, 0); 
-			  IsRunning = false;
-        }
-
 		private void SaveAudioToFile(string audioFilePath)
 		{
 			if (contentMemoryStream == null) return;
@@ -81,7 +92,7 @@ namespace Kinect.Replay.Record
 		public void Stop(string audioFilePath)
 		{
 			IsRunning = false;
-            SaveAudioToFile(audioFilePath);
+			SaveAudioToFile(audioFilePath);
 		}
 
 		/// <summary>
@@ -146,9 +157,6 @@ namespace Kinect.Replay.Record
 			public ushort wBitsPerSample;
 			public ushort cbSize;
 		}
-
-		[DllImport("winmm.dll", EntryPoint = "mciSendStringA", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
-		private static extern int mciSendString(string lpstrCommand, string lpstrReturnString, int uReturnLength, int hwndCallback);
-
+		#endregion
 	}
 }
