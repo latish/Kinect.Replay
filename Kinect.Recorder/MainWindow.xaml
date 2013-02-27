@@ -4,34 +4,37 @@
         Title="MainWindow" Loaded="MainWindowLoaded"
         DataContext="{Binding RelativeSource={RelativeSource Self}}" 
         SizeToContent="WidthAndHeight">
-        <Window.Resources>
-            <Style TargetType="Button" x:Key="RecordButton">
-                <Setter Property="Content" Value="Record" />
-                <Setter Property="Margin" Value="5" />
-                <Setter Property="FontSize" Value="15" />
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsRecording}" Value="True">
-                        <Setter Property="Content" Value="Stop" />
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsReplaying}" Value="True">
-                        <Setter Property="IsEnabled" Value="False" />
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-            <Style TargetType="Button" x:Key="ReplayButton">
-                <Setter Property="Content" Value="Replay" />
-                <Setter Property="Margin" Value="5" />
-                <Setter Property="FontSize" Value="15" />
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsReplaying}" Value="True">
-                        <Setter Property="Content" Value="Stop" />
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsRecording}" Value="True">
-                        <Setter Property="IsEnabled" Value="False" />
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Window.Resources>
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="RecordButton">
+            <Setter Property="Content" Value="Record" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="FontSize" Value="15" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsRecording}" Value="True">
+                    <Setter Property="Content" Value="Stop" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsReplaying}" Value="True">
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding KinectPresent}" Value="False">
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="Button" x:Key="ReplayButton">
+            <Setter Property="Content" Value="Replay" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="FontSize" Value="15" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsReplaying}" Value="True">
+                    <Setter Property="Content" Value="Stop" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsRecording}" Value="True">
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     <StackPanel>
         <TextBlock Text="Kinect.Replay Recorder" FontSize="30" HorizontalAlignment="Center"/>
         <TextBlock Text="{Binding Message}" FontSize="30" Foreground="Red" HorizontalAlignment="Center"/>

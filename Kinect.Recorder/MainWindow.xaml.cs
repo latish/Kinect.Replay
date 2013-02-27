@@ -31,6 +31,7 @@ namespace Kinect.Recorder
 		private bool _isReplaying;
 		private bool _startedAudio;
 		private SoundPlayer _soundPlayer;
+		private bool _kinectPresent;
 
 		public MainWindow()
 		{
@@ -58,6 +59,17 @@ namespace Kinect.Recorder
 				if (value.Equals(_imageSource)) return;
 				_imageSource = value;
 				PropertyChanged.Raise(() => ImageSource);
+			}
+		}
+
+		public bool KinectPresent
+		{
+			get { return _kinectPresent; }
+			set
+			{
+				if (value.Equals(_kinectPresent)) return;
+				_kinectPresent = value;
+				PropertyChanged.Raise(() => KinectPresent);
 			}
 		}
 
@@ -92,7 +104,10 @@ namespace Kinect.Recorder
 
 				_kinectSensor = KinectSensor.KinectSensors.FirstOrDefault(sensor => sensor.Status == KinectStatus.Connected);
 				if (_kinectSensor == null)
+				{
 					Message = "No Kinect found on startup";
+					KinectPresent = false;
+				}
 				else
 					Initialize();
 			}
@@ -135,6 +150,7 @@ namespace Kinect.Recorder
 
 		private void Clean()
 		{
+			KinectPresent = false;
 			if (recorder != null && IsRecording)
 				recorder.Stop();
 			if (replay != null)
@@ -162,6 +178,7 @@ namespace Kinect.Recorder
 			_kinectSensor.Start();
 			_kinectSensor.AudioSource.Start();
 			Message = "Kinect connected";
+			KinectPresent = true;
 		}
 
 		void KinectSensorAllFramesReady(object sender, AllFramesReadyEventArgs e)
